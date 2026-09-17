@@ -1,0 +1,3 @@
+[submodule "injectfrb"]
+	path = injectfrb
+	url = https://github.com/liamconnor/injectfrb.git
