@@ -11,3 +11,24 @@ n_background: 5
 output_file: "test_data_chapter6.hdf5"
 target_shape: [256, 256]
 
+hypercube_params:
+  dm:
+    low: 10
+    high: 1000
+    log: true
+  snr:
+    low: 5
+    high: 35
+    log: false
+  width_s:
+    low: 1.0e-4
+    high: 1.0e-2
+    log: true
+  scat_s:
+    low: 1.0e-6
+    high: 1.0e-2
+    log: true
+  spec_id:
+    low: -4
+    high: 4
+    log: false
