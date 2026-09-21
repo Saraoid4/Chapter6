@@ -1,0 +1,36 @@
+split: train
+
+background_dir:
+  - "/Users/selbouch/Desktop/Chapter6/data_npz/snippetsBF_4768x256_BA"
+  - "/Users/selbouch/Desktop/Chapter6/data_npz/snippetsHF_4768x256_BA"
+
+test_frac: 0.2
+split_seed: 21
+
+n_frb: 5
+n_background: 5
+
+output_file: "train_data_chapter6.hdf5"
+target_shape: [256, 256]
+
+hypercube_params:
+  dm:
+    low: 10
+    high: 1000
+    log: true
+  snr:
+    low: 5
+    high: 35
+    log: false
+  width_s:
+    low: 1.0e-4
+    high: 1.0e-2
+    log: true
+  scat_s:
+    low: 1.0e-6
+    high: 1.0e-2
+    log: true
+  spec_id:
+    low: -4
+    high: 4
+    log: false

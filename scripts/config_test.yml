@@ -1,0 +1,13 @@
+split: test
+background_dir: 
+  - "./data_npz/snippetsHF_4768x256_BA"
+  - "./data_npz/snippetsBF_4768x256_BA"
+test_frac: 0.2
+split_seed: 21
+
+n_frb: 5
+n_background: 5
+
+output_file: "test_data_chapter6.hdf5"
+target_shape: [256, 256]
+
