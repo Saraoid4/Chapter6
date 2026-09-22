@@ -8,7 +8,7 @@ import glob
 from copy import deepcopy
 import random
 from backgrounds import BgCache, get_array_from_npz
-
+from utils import standardize_data_shape_time
 
 class FRBConstants:
     DEFAULT_FLUENCE = 1
@@ -134,7 +134,8 @@ class Generator(FRB):
         self.burst = frb_cropped
 
         #Todo standardize the shapes for all background: add in utils
-        final = scale_factor*frb_cropped + deepcopy(self.bg_data[:,1:])
+        x = standardize_data_shape_time(self.bg_data)
+        final = scale_factor*frb_cropped + deepcopy(x.numpy())
 
         return final
 
