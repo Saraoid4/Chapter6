@@ -72,12 +72,7 @@ class FRB:
         return max_intergrated, scale_factor
 
     def get_data(self):
-        if self.simulated_final is None:
-            raise ValueError("No simulated data")
-        if self.simulated_final.shape[0] == FRBConstants.DEFAULT_CROP_SIZE and self.simulated_final.shape[1] == self.n_chann:
-            return np.swapaxes(self.simulated_final, 0, 1)
-        else:
-            return self.simulated_final
+        return self.simulated_final
 
 CACHE = BgCache(use_db=False)
 class Generator(FRB):
@@ -103,7 +98,7 @@ class Generator(FRB):
         background = deepcopy(CACHE.get(path))
         self.source_file = path
         if rebin:
-            rebin_factor = background.shape[1]//256
+            rebin_factor = int(background.shape[1]//256)
             rebinned_arr = background.reshape(background.shape[0], rebin_factor, 256).mean(axis=1)
         else:
             rebinned_arr = background
@@ -117,7 +112,8 @@ class Generator(FRB):
         sweep_s = k_dm*self.dm*(self.freq_rang[1]**-2 - self.freq_rang[0]**-2)
         total_observation = int(np.ceil((sweep_s + 10*self.scat_s + 0.25)/self.dt)) 
         print(total_observation)
-        n_time_long = max(total_observation, self.bg_data.shape[1] * FRBConstants.TIME_EXTENSION_FACTOR)
+        #n_time_long = max(total_observation, self.bg_data.shape[1] * FRBConstants.TIME_EXTENSION_FACTOR)
+        n_time_long = max(total_observation*2, self.bg_data.shape[1] * FRBConstants.TIME_EXTENSION_FACTOR)+ FRBConstants.DEFAULT_CROP_SIZE
         large_background = np.zeros((self.bg_data.shape[0], n_time_long))
         frb = gen_simulated_frb(dm=self.dm, fluence = FRBConstants.DEFAULT_FLUENCE, width=self.width_s, NFREQ = large_background.shape[0], NTIME = n_time_long,
                                 scat_tau_ref=self.scat_s, scintillate=True, spec_ind=self.spec_id, background_noise=large_background, freq=self.freq_rang, FREQ_REF=self.freq_rang[0],
@@ -127,8 +123,11 @@ class Generator(FRB):
         integrated = np.mean(frb_spectra.data, axis=0)
         max_integrated, scale_factor = self._estimate_pulse_peak(integrated)
 
-        self.index_start = random.randint(-100, 100)
-        new_center = n_time_long//2 - self.index_start
+        #self.index_start = random.randint(-100, 100)
+        #new_center = n_time_long//2 - self.index_start
+        center_factor = random.uniform(0,1)
+        #new_center = n_time_long//2 - self.index_start
+        new_center = int(n_time_long//2 + center_factor*(sweep_s/self.dt))
         crop_start = new_center - FRBConstants.DEFAULT_CROP_SIZE // 2
         crop_end = new_center + FRBConstants.DEFAULT_CROP_SIZE // 2
         frb_cropped = frb[0][:, crop_start:crop_end]
