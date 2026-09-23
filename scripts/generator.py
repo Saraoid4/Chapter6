@@ -10,6 +10,9 @@ import random
 from backgrounds import BgCache, get_array_from_npz
 from utils import standardize_data_shape_time
 
+def loguniform(low,high,size=None):
+        return np.exp(np.random.uniform(low,high,size))
+
 class FRBConstants:
     DEFAULT_FLUENCE = 1
     DEFAULT_SPEC_IND = 0.0
@@ -21,7 +24,7 @@ class FRBConstants:
 
 
 class FRB:
-    def __init__(self, param, positive, fmin=400, fmax=800, dt=0.004):
+    def __init__(self, param, positive, fmin=400, fmax=800, dt=0.01):
         self.param = param
         self.dm = param["dm"]
         self.snr = param["snr"]
@@ -103,7 +106,7 @@ class Generator(FRB):
             rebinned_arr = background
         self.bg_data = np.swapaxes(rebinned_arr, 0, 1) 
         
-
+    
     def _create_simulation(self):
         if self.bg_data is None:
             raise ValueError("Background data must be loaded before creating simulation")
@@ -124,7 +127,7 @@ class Generator(FRB):
 
         #self.index_start = random.randint(-100, 100)
         #new_center = n_time_long//2 - self.index_start
-        center_factor = random.uniform(0,1)
+        center_factor = loguniform(-3,0)
         #new_center = n_time_long//2 - self.index_start
         new_center = int(n_time_long//2 + center_factor*(sweep_s/self.dt))
         crop_start = new_center - FRBConstants.DEFAULT_CROP_SIZE // 2

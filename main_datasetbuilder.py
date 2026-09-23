@@ -4,12 +4,12 @@ import json
 import yaml
 import numpy as np
 import h5py
-
+import random
 from backgrounds import list_background_files, split_backgrounds
 from sampler import IndepSampler, LatinHypercubeSampler
 from generator import Generator
 
-fmin, fmax, dt = 400, 800, 0.004
+fmin, fmax, dt = 400, 800, 0.01
 
 def split_from_config(config):
     all_files = list_background_files(config["background_dir"])
@@ -69,6 +69,8 @@ def build_negative_samples(config, files, rng):
 #TODO: write ssamples to hdf5 files
 def write_h5_file(samples, config):
     n = len(samples)
+    #random.seed(config["split_seed"])
+    #random.shuffle(samples)
     target_shape = tuple(config["target_shape"])
     with h5py.File(config["output_file"], "w") as hf:
         data = hf.create_dataset("data", shape=(n, *target_shape), dtype=np.float32)
