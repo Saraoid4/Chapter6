@@ -51,7 +51,7 @@ class IndepSampler:
             return loguniform.rvs(low, high)
         elif dist == "lognormal":
             mu, sigma = float(spec["mu"]), float(spec["sigma"])
-            return max(0, min(np.random.lognormal(mu, sigma),1500))
+            return np.random.lognormal(mu, sigma)
         else:
             raise ValueError("Unknow distribution")
     def sample_all(self):

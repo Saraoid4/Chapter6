@@ -8,7 +8,7 @@ import glob
 from copy import deepcopy
 import random
 from backgrounds import BgCache, get_array_from_npz
-from utils import standardize_data_shape_time
+from utils import standardize_data_shape_time, standardize_frequency_shape, linear_to_db
 
 def loguniform(low,high,size=None):
         return np.exp(np.random.uniform(low,high,size))
@@ -26,7 +26,8 @@ class FRBConstants:
 class FRB:
     def __init__(self, param, positive, fmin=400, fmax=800, dt=0.01):
         self.param = param
-        self.dm = param["dm"]
+        if positive:
+            self.dm = max(0, min(param["dm"],1500))
         self.snr = param["snr"]
         self.width_s = param["width_s"]
         self.scat_s = param["scat_s"]
@@ -86,7 +87,7 @@ class Generator(FRB):
             self._calculate_noise_statistics()
             self.simulated_final = self._create_simulation()
         else:
-            self.simulated_final = standardize_data_shape_time(self.bg_data).numpy()
+            self.simulated_final = standardize_data_shape_time(self.bg_data).numpy()[::-1,:]
 
 
 
@@ -98,13 +99,15 @@ class Generator(FRB):
         else:
             path = background_dir
         background = deepcopy(CACHE.get(path))
+        background_swap = np.swapaxes(background, 0, 1)
         self.source_file = path
         if rebin:
-            rebin_factor = int(background.shape[1]//256)
-            rebinned_arr = background.reshape(background.shape[0], rebin_factor, 256).mean(axis=1)
+            #rebin_factor = int(background.shape[1]//256)
+            #rebinned_arr = background.reshape(background.shape[0], rebin_factor, 256).mean(axis=1)
+            rebinned_arr = standardize_frequency_shape(background_swap).numpy()
         else:
-            rebinned_arr = background
-        self.bg_data = np.swapaxes(rebinned_arr, 0, 1) 
+            rebinned_arr =background_swap
+        self.bg_data = rebinned_arr
         
     
     def _create_simulation(self):
@@ -136,7 +139,7 @@ class Generator(FRB):
 
         #Todo standardize the shapes for all background: add in utils
         x = standardize_data_shape_time(self.bg_data)
-        final = scale_factor*frb_cropped + deepcopy(x.numpy())
+        final = scale_factor*frb_cropped + deepcopy(x.numpy()[::-1,:])
 
         return final
 
