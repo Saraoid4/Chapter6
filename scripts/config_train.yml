@@ -30,7 +30,7 @@ parameters_train:
     sigma: 1
     log: true
   scat_s:
-    distribution: loguniform
+    distribution: lognormal
     mu: -4.6
     sigma: 1
     log: true
