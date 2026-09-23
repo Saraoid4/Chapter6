@@ -6,7 +6,7 @@ import numpy as np
 import h5py
 
 from backgrounds import list_background_files, split_backgrounds
-from sampler import Sampler
+from sampler import IndepSampler, LatinHypercubeSampler
 from generator import Generator
 
 fmin, fmax, dt = 400, 800, 0.004
@@ -22,8 +22,8 @@ def split_from_config(config):
     else:
         raise ValueError("Unknown split in config")
     
-def set_sampler_from_config(config):
-    sampler = Sampler.__new__(Sampler)
+def set_hcsampler_from_config(config):
+    sampler = LatinHypercubeSampler.__new__(LatinHypercubeSampler)
     sampler.config = config
     sampler.param_specs = config["hypercube_params"]
     sampler.param_names = list(sampler.param_specs.keys())
@@ -32,8 +32,22 @@ def set_sampler_from_config(config):
     sampler.seed = config.get("split_seed",None)
     return sampler
 
+def set_indep_sampler_from_config(config, seed=21):
+    sampler = IndepSampler.__new__(IndepSampler)
+    sampler.config = config
+    sampler.param_specs = config[f"parameters_{sampler.config["split"]}"]
+    sampler.n_frb = config["n_frb"]
+    sampler.n_background = config.get("n_background",0)
+    sampler.seed = config.get("split_seed",None)
+    sampler.param_names = list(sampler.param_specs.keys())
+    return sampler
+
+def set_param_sampler_from_config(config):
+    param_specs = config[f"parameters_{config["split"]}"]
+    return IndepSampler(param_specs, n=config["n_frb"], seed=config.get("split_seed",None))
+
 def build_positive_samples(config, files, rng):
-    sampler = set_sampler_from_config(config)
+    sampler = set_indep_sampler_from_config(config)
     params = sampler.sample_all()
     frbs = []
     for param in params:
@@ -52,6 +66,9 @@ def build_negative_samples(config, files, rng):
         bgs.append({"data": gen.get_data(), "label":0, "background_file":bg_path, "param":bg_params})
     return bgs
 
+#TODO: write ssamples to hdf5 files
+#TODO: build whole hdf5 data
+
 if __name__=='__main__':
     with open('scripts/config_train.yml', "r") as f:
         config_train = yaml.safe_load(f) 
@@ -59,6 +76,6 @@ if __name__=='__main__':
         config_test = yaml.safe_load(f)
     rng = np.random.default_rng(42)
     full_train = split_from_config(config=config_train)
-    sampler = set_sampler_from_config(config=config_train)
+    sampler = set_indep_sampler_from_config(config=config_train)
     simus_pos = build_positive_samples(config_train, full_train, rng)
-    simus_neg = build_negative_samples(config_test, full_train, rng)
+    #simus_neg = build_negative_samples(config_test, full_train, rng)

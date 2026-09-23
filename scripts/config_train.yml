@@ -25,14 +25,14 @@ parameters_train:
     high: 100
     log: true
   width_s:
-    distribution: lognormal
-    low: 1.0e-4
-    high: 1.0e-2
+    distribution: loguniform
+    mu: -6.9
+    sigma: 1
     log: true
   scat_s:
-    distribution: lognormal
-    low: 1.0e-3
-    high: 1.0e-1
+    distribution: loguniform
+    mu: -4.6
+    sigma: 1
     log: true
   spec_id:
     distribution: uniform
