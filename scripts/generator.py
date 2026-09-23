@@ -23,7 +23,6 @@ class FRBConstants:
 class FRB:
     def __init__(self, param, positive, fmin=400, fmax=800, dt=0.004):
         self.param = param
-        print(self.param)
         self.dm = param["dm"]
         self.snr = param["snr"]
         self.width_s = param["width_s"]
@@ -84,7 +83,7 @@ class Generator(FRB):
             self._calculate_noise_statistics()
             self.simulated_final = self._create_simulation()
         else:
-            self.simulated_final = self.bg_data
+            self.simulated_final = standardize_data_shape_time(self.bg_data).numpy()
 
 
 
@@ -110,7 +109,7 @@ class Generator(FRB):
             raise ValueError("Background data must be loaded before creating simulation")
         k_dm = 1e3/0.241
         sweep_s = k_dm*self.dm*(self.freq_rang[1]**-2 - self.freq_rang[0]**-2)
-        total_observation = int(np.ceil((sweep_s + 10*self.scat_s + 0.25)/self.dt)) 
+        total_observation = int((sweep_s + 10*self.scat_s + 0.25)/self.dt)
         print(total_observation)
         #n_time_long = max(total_observation, self.bg_data.shape[1] * FRBConstants.TIME_EXTENSION_FACTOR)
         n_time_long = max(total_observation*2, self.bg_data.shape[1] * FRBConstants.TIME_EXTENSION_FACTOR)+ FRBConstants.DEFAULT_CROP_SIZE

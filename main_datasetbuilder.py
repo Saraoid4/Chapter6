@@ -70,19 +70,18 @@ def build_negative_samples(config, files, rng):
 def write_h5_file(samples, config):
     n = len(samples)
     target_shape = tuple(config["target_shape"])
-    with h5py.file(config["output_file"], "w") as hf:
+    with h5py.File(config["output_file"], "w") as hf:
         data = hf.create_dataset("data", shape=(n, *target_shape), dtype=np.float32)
         labels = hf.create_dataset("label", shape=(n,), dtype=np.uint8)
         str_dtype = h5py.string_dtype()
-        params = hf.create_data("parameters", shape=(n,), dtype=str_dtype)
-        provenance_data = hf.create_data("bg_file", shape=(n,), dtype=str_dtype)
+        params = hf.create_dataset("parameters", shape=(n,), dtype=str_dtype)
+        provenance_data = hf.create_dataset("bg_file", shape=(n,), dtype=str_dtype)
         for i, sam in enumerate(samples):
             data[i] = sam["data"].astype(np.float32)
-            labels[i] = sam["label"].astype(np.uint8)
+            labels[i] = sam["label"]
             provenance_data[i] = sam["background_file"]
-            params[i] = json.write(sam["param"])
-
-
+            params[i] = json.dumps(sam["param"])
+    hf.close()
 if __name__=='__main__':
     import matplotlib.pyplot as plt
 
