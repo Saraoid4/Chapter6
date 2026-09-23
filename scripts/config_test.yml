@@ -11,24 +11,29 @@ n_background: 5
 output_file: "test_data_chapter6.hdf5"
 target_shape: [256, 256]
 
-hypercube_params:
+parameters_test:
   dm:
+    distribution: uniform
     low: 10
     high: 1000
-    log: true
+    log: false
   snr:
+    distribution: uniform
     low: 5
-    high: 35
+    high: 100
     log: false
   width_s:
+    distribution: lognormal
     low: 1.0e-4
     high: 1.0e-2
     log: true
   scat_s:
+    distribution: lognormal
     low: 1.0e-6
     high: 1.0e-2
     log: true
   spec_id:
+    distribution: uniform
     low: -4
     high: 4
     log: false
