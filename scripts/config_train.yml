@@ -15,17 +15,17 @@ target_shape: [256, 256]
 
 parameters_train:
   dm:
-    distribution: uniform
-    low: 50
-    high: 2000
-    log: false
+    distribution: lognormal
+    mu: 6.
+    sigma: 1.
+    log: true
   snr:
     distribution: loguniform
     low: 5
     high: 100
     log: true
   width_s:
-    distribution: loguniform
+    distribution: lognormal
     mu: -6.9
     sigma: 1
     log: true

@@ -67,9 +67,25 @@ def build_negative_samples(config, files, rng):
     return bgs
 
 #TODO: write ssamples to hdf5 files
-#TODO: build whole hdf5 data
+def write_h5_file(samples, config):
+    n = len(samples)
+    target_shape = tuple(config["target_shape"])
+    with h5py.file(config["output_file"], "w") as hf:
+        data = hf.create_dataset("data", shape=(n, *target_shape), dtype=np.float32)
+        labels = hf.create_dataset("label", shape=(n,), dtype=np.uint8)
+        str_dtype = h5py.string_dtype()
+        params = hf.create_data("parameters", shape=(n,), dtype=str_dtype)
+        provenance_data = hf.create_data("bg_file", shape=(n,), dtype=str_dtype)
+        for i, sam in enumerate(samples):
+            data[i] = sam["data"].astype(np.float32)
+            labels[i] = sam["label"].astype(np.uint8)
+            provenance_data[i] = sam["background_file"]
+            params[i] = json.write(sam["param"])
+
 
 if __name__=='__main__':
+    import matplotlib.pyplot as plt
+
     with open('scripts/config_train.yml', "r") as f:
         config_train = yaml.safe_load(f) 
     with open('scripts/config_test.yml', "r") as f:
@@ -78,4 +94,5 @@ if __name__=='__main__':
     full_train = split_from_config(config=config_train)
     sampler = set_indep_sampler_from_config(config=config_train)
     simus_pos = build_positive_samples(config_train, full_train, rng)
-    #simus_neg = build_negative_samples(config_test, full_train, rng)
+    simus_neg = build_negative_samples(config_train, full_train, rng)
+    write_h5_file(simus_pos + simus_neg, config_train)
