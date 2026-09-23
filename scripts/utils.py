@@ -6,7 +6,6 @@ import torch.nn.functional as F
 def standardize_data_shape_time(background_data, T=256, n_freq=256):
     x = torch.as_tensor(background_data, dtype=torch.float32)
     f, t = x.shape
-    print(t)
     x = x[:n_freq, :]
     if t == T:
         return x

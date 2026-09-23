@@ -16,7 +16,7 @@ def loguniform(low,high,size=None):
 class FRBConstants:
     DEFAULT_FLUENCE = 1
     DEFAULT_SPEC_IND = 0.0
-    FREQ_THRESHOLD = 100 
+    FREQ_THRESHOLD = 200 
     TIME_EXTENSION_FACTOR = 100 
     DEFAULT_CROP_SIZE = 256
     DEFAULT_CENTER_INDEX = DEFAULT_CROP_SIZE * TIME_EXTENSION_FACTOR // 2
@@ -36,7 +36,7 @@ class FRB:
         self.n_chann = FRBConstants.BAND_LIMIT_CHANNELS
         self.freq_rang = (fmax,fmin)
         self.freq_list = np.linspace(fmax, fmin, self.n_chann)
-        self.freq_ref = self._set_reference_frequency()
+        self.freq_ref = fmax
         self.sigma = None
         self.simulated_final = None
     
@@ -113,12 +113,11 @@ class Generator(FRB):
         k_dm = 1e3/0.241
         sweep_s = k_dm*self.dm*(self.freq_rang[1]**-2 - self.freq_rang[0]**-2)
         total_observation = int((sweep_s + 10*self.scat_s + 0.25)/self.dt)
-        print(total_observation)
         #n_time_long = max(total_observation, self.bg_data.shape[1] * FRBConstants.TIME_EXTENSION_FACTOR)
         n_time_long = max(total_observation*2, self.bg_data.shape[1] * FRBConstants.TIME_EXTENSION_FACTOR)+ FRBConstants.DEFAULT_CROP_SIZE
         large_background = np.zeros((self.bg_data.shape[0], n_time_long))
         frb = gen_simulated_frb(dm=self.dm, fluence = FRBConstants.DEFAULT_FLUENCE, width=self.width_s, NFREQ = large_background.shape[0], NTIME = n_time_long,
-                                scat_tau_ref=self.scat_s, scintillate=True, spec_ind=self.spec_id, background_noise=large_background, freq=self.freq_rang, FREQ_REF=self.freq_rang[0],
+                                scat_tau_ref=self.scat_s, scintillate=True, spec_ind=self.spec_id, background_noise=large_background, freq=self.freq_rang, FREQ_REF=self.freq_ref,
                                 delta_t = self.dt, conv_dmsmear=False)
         frb_spectra = spectra.Spectra(freqs=self.freq_list, dt=self.dt, data=deepcopy(frb[0]), starttime=0, dm=self.dm)
         frb_spectra.dedisperse(self.dm, ref_freq=self.freq_ref)
@@ -143,7 +142,12 @@ class Generator(FRB):
 
 
 if __name__=="__main__":
-    test_frb = FRB(param={"dm":10, "snr":10, "width_s":1e-4, "scat_s":1e-5, "spec_id":0}, positive=True)
+    import matplotlib
+    import matplotlib.pyplot as plt
+    params = {"dm":600, "snr":20, "width_s":1e-3, "scat_s":0, "spec_id":0}
+    test_frb_generator = Generator(param=params, positive=True, background_dir="./data_npz/snippetsHF_4768x256_BA", fmin=400, fmax=800, dt=0.01)
+    #nenufar_bg = test_frb_generator._load_background_nenufar(background_dir="./data_npz/snippetsHF_4768x256_BA", file_idx=0)
+    fin = test_frb_generator.simulated_final
         
         
 
